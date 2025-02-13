@@ -1,39 +1,54 @@
-# geometrythreejs
+<h1>3D визуализация</h1>
 
-This template should help get you started developing with Vue 3 in Vite.
+## Описание задания
 
-## Recommended IDE Setup
+- Отрезок AB в 3D пространстве x y z.
+- Известны координаты точек A и B.
+- Необходимо найти угол наклона отрезка AB к плоскости xy и азимут.
+- Для визуализации использовать фреймворк ThreeJS.
+- Перемещение точек отрезка AB реализовать через инструмент transform controls ThreeJS.
+- Вывод расчетного угла и азимута реализовать любым удобным способом.
+- Проект оформить в репозиторий github,
+- В репозитории должен присутствовать readme с инструкция по запуску проекта и комментарии автора.
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Вид проекта
 
-## Type Support for `.vue` Imports in TS
+<img src="public/screenshot.png">
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+## Посмотреть проект без установки
 
-## Customize configuration
+[Ссылка на сайт](https://three-js-visualizer.vercel.app/)
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## Рекомендуемая настройка IDE
 
-## Project Setup
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (и отключить Vetur).
 
-```sh
-yarn
-```
+## Поддержка типов для импорта `.vue` в TS
 
-### Compile and Hot-Reload for Development
+TypeScript не может обрабатывать информацию о типах для импорта `.vue` по умолчанию, поэтому мы заменяем `tsc` CLI на `vue-tsc` для проверки типов. В редакторах нам нужен [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar), чтобы сделать службу языка TypeScript осведомленной о типах `.vue`.
 
-```sh
-yarn dev
-```
+## Настройка конфигурации
 
-### Type-Check, Compile and Minify for Production
+Смотрите [Vite Configuration Reference](https://vite.dev/config/).
 
-```sh
-yarn build
-```
+## Установка
 
-### Lint with [ESLint](https://eslint.org/)
+1. Склонируйте репозиторий:
 
-```sh
-yarn lint
-```
+   ```bash
+   git clone https://github.com/nikgritenok/geometrythreejs.git
+   ```
+
+2. Установите зависимости:
+
+   ```bash
+   yarn install
+   ```
+
+3. Запустите приложение:
+
+   ```bash
+   yarn dev
+   ```
+
+4. Откройте приложение в браузере по адресу [http://localhost:5173](http://localhost:5173).
