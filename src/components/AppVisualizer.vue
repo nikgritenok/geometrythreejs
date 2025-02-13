@@ -8,6 +8,7 @@ import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js'
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
 import * as dat from 'dat.gui'
 import { useGeometryStore } from '@/stores/useGeometryStore'
+import { setupDatGui } from '@/utils/guiConfig'
 
 const geometryStore = useGeometryStore()
 
@@ -83,6 +84,8 @@ const init = () => {
     controls.enabled = !event.value
   })
 
+  setupDatGui({ pointA, pointB, projectionA, projectionB, line })
+
   const transformControlsB = new TransformControls(camera, renderer.domElement)
   transformControlsB.setSize(0.5)
   transformControlsB.attach(pointB)
@@ -93,76 +96,6 @@ const init = () => {
   })
   transformControlsB.addEventListener('dragging-changed', (event) => {
     controls.enabled = !event.value
-  })
-
-  const gui = new dat.GUI()
-
-  const params = {
-    pointAColor: geometryStore.pointAColor,
-    pointBColor: geometryStore.pointBColor,
-    projectionAColor: '#ff8800',
-    projectionBColor: '#ff8800',
-    lineColor: geometryStore.lineColor,
-    lineThickness: geometryStore.lineThickness,
-    pointARadius: geometryStore.pointARadius,
-    pointBRadius: geometryStore.pointBRadius,
-    projectionARadius: 0.05,
-    projectionBRadius: 0.05,
-  }
-
-  const colorsFolder = gui.addFolder('Цвета')
-  colorsFolder.addColor(params, 'pointAColor').onChange((color) => {
-    geometryStore.pointAColor = color
-    pointA.material.color.set(color)
-    console.log(geometryStore.pointAColor)
-  })
-  colorsFolder.addColor(params, 'pointBColor').onChange((color) => {
-    geometryStore.pointBColor = color
-    pointB.material.color.set(color)
-  })
-  colorsFolder.addColor(params, 'projectionAColor').onChange((color) => {
-    projectionA.material.color.set(color)
-  })
-  colorsFolder.addColor(params, 'projectionBColor').onChange((color) => {
-    projectionB.material.color.set(color)
-  })
-  colorsFolder.addColor(params, 'lineColor').onChange((color) => {
-    geometryStore.lineColor = color
-    line.material.color.set(color)
-  })
-
-  const sizeFolder = gui.addFolder('Размеры')
-  sizeFolder.add(params, 'pointARadius', 0.01, 1).onChange((size) => {
-    geometryStore.pointARadius = size
-    pointA.geometry = new THREE.SphereGeometry(size)
-  })
-  sizeFolder.add(params, 'pointBRadius', 0.01, 1).onChange((size) => {
-    geometryStore.pointBRadius = size
-    pointB.geometry = new THREE.SphereGeometry(size)
-  })
-  sizeFolder.add(params, 'projectionARadius', 0.01, 1).onChange((size) => {
-    projectionA.geometry = new THREE.SphereGeometry(size)
-  })
-  sizeFolder.add(params, 'projectionBRadius', 0.01, 1).onChange((size) => {
-    projectionB.geometry = new THREE.SphereGeometry(size)
-  })
-
-  const positionFolder = gui.addFolder('Позиции')
-  const PointA = positionFolder.addFolder('Точка A')
-  const PointB = positionFolder.addFolder('Точка B')
-  PointA.add(pointA.position, 'x', -10, 10).onChange(geometryStore.updateAngles)
-  PointA.add(pointA.position, 'y', -10, 10).onChange(geometryStore.updateAngles)
-  PointA.add(pointA.position, 'z', -10, 10).onChange(geometryStore.updateAngles)
-  PointB.add(pointB.position, 'x', -10, 10).onChange(geometryStore.updateAngles)
-  PointB.add(pointB.position, 'y', -10, 10).onChange(geometryStore.updateAngles)
-  PointB.add(pointB.position, 'z', -10, 10).onChange(geometryStore.updateAngles)
-  positionFolder.open()
-
-  const lineFolder = gui.addFolder('Линия')
-  lineFolder.add(params, 'lineThickness', 1, 10).onChange((thickness) => {
-    geometryStore.lineThickness = thickness
-    line.material.linewidth = thickness
-    console.log(geometryStore.lineThickness)
   })
 }
 
