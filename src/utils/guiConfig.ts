@@ -82,4 +82,51 @@ export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: 
     geometryStore.lineThickness = thickness
     line.material.linewidth = thickness
   })
+
+  const settingsFolder = gui.addFolder('Настройки')
+  const settingsParams = {
+    save: () => {
+      const settings = {
+        pointAColor: geometryStore.pointAColor,
+        pointBColor: geometryStore.pointBColor,
+        pointARadius: geometryStore.pointARadius,
+        pointBRadius: geometryStore.pointBRadius,
+        lineColor: geometryStore.lineColor,
+        lineThickness: geometryStore.lineThickness,
+        pointA: { x: pointA.position.x, y: pointA.position.y, z: pointA.position.z },
+        pointB: { x: pointB.position.x, y: pointB.position.y, z: pointB.position.z },
+      }
+      localStorage.setItem('threeSettings', JSON.stringify(settings))
+      console.log(settings)
+      console.log('Настройки сохранены')
+    },
+    reset: () => {
+      localStorage.removeItem('threeSettings')
+
+      geometryStore.setPointAPosition(-1, 0, 0)
+      geometryStore.setPointBPosition(1, 1, 1)
+      geometryStore.pointAColor = '#ff0000'
+      geometryStore.pointBColor = '#0000ff'
+      geometryStore.pointARadius = 0.1
+      geometryStore.pointBRadius = 0.1
+      geometryStore.lineColor = '#ffffff'
+      geometryStore.lineThickness = 2
+      ;(pointA.material as THREE.MeshBasicMaterial).color.set(geometryStore.pointAColor)
+      ;(pointB.material as THREE.MeshBasicMaterial).color.set(geometryStore.pointBColor)
+      pointA.geometry = new THREE.SphereGeometry(geometryStore.pointARadius)
+      pointB.geometry = new THREE.SphereGeometry(geometryStore.pointBRadius)
+      line.material.color.set(geometryStore.lineColor)
+      line.material.linewidth = geometryStore.lineThickness
+
+      pointA.position.copy(geometryStore.pointA)
+      pointB.position.copy(geometryStore.pointB)
+      geometryStore.updateProjections()
+      projectionA.position.copy(geometryStore.projectionA)
+      projectionB.position.copy(geometryStore.projectionB)
+
+      console.log('Настройки сброшены')
+    },
+  }
+  settingsFolder.add(settingsParams, 'save').name('Сохранить настройки')
+  settingsFolder.add(settingsParams, 'reset').name('Сбросить настройки')
 }

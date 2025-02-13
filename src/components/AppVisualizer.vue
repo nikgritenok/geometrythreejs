@@ -39,7 +39,7 @@ lineGeometry.setPositions(geometryStore.linePositions)
 
 const lineMaterial = new LineMaterial({
   color: geometryStore.lineColor,
-  linewidth: geometryStore.lineThickness,
+  linewidth: 2,
   resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
 })
 
@@ -103,10 +103,33 @@ const init = () => {
 }
 
 onMounted(() => {
+  // Загружаем сохранённые настройки, если они есть
+  const savedSettings = localStorage.getItem('threeSettings')
+  if (savedSettings) {
+    const settings = JSON.parse(savedSettings)
+
+    geometryStore.pointAColor = settings.pointAColor
+    geometryStore.pointBColor = settings.pointBColor
+    geometryStore.pointARadius = settings.pointARadius
+    geometryStore.pointBRadius = settings.pointBRadius
+    geometryStore.lineColor = settings.lineColor
+    geometryStore.lineThickness = settings.lineThickness
+
+    geometryStore.setPointAPosition(settings.pointA.x, settings.pointA.y, settings.pointA.z)
+    geometryStore.setPointBPosition(settings.pointB.x, settings.pointB.y, settings.pointB.z)
+  }
+
   init()
+
+  pointA.position.copy(geometryStore.pointA)
+  pointB.position.copy(geometryStore.pointB)
+  ;(pointA.material as THREE.MeshBasicMaterial).color.set(geometryStore.pointAColor)
+  ;(pointB.material as THREE.MeshBasicMaterial).color.set(geometryStore.pointBColor)
+
   geometryStore.updateProjections()
   projectionA.position.copy(geometryStore.projectionA)
   projectionB.position.copy(geometryStore.projectionB)
+
   animate()
 
   watch(
