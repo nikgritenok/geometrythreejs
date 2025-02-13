@@ -100,6 +100,20 @@ const init = () => {
   })
 
   setupDatGui({ pointA, pointB, projectionA, projectionB, line })
+
+  const onWindowResize = () => {
+    console.log('onWindowResize')
+    const width = window.innerWidth
+    const height = window.innerHeight
+
+    camera.aspect = width / height
+    camera.updateProjectionMatrix()
+
+    renderer.setSize(width, height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  }
+
+  window.addEventListener('resize', onWindowResize)
 }
 
 onMounted(() => {
