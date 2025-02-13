@@ -69,12 +69,22 @@ export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: 
   const positionFolder = gui.addFolder('Позиции')
   const PointA = positionFolder.addFolder('Точка A')
   const PointB = positionFolder.addFolder('Точка B')
-  PointA.add(pointA.position, 'x', -10, 10).onChange(() => geometryStore.updateAngles())
-  PointA.add(pointA.position, 'y', -10, 10).onChange(() => geometryStore.updateAngles())
-  PointA.add(pointA.position, 'z', -10, 10).onChange(() => geometryStore.updateAngles())
-  PointB.add(pointB.position, 'x', -10, 10).onChange(() => geometryStore.updateAngles())
-  PointB.add(pointB.position, 'y', -10, 10).onChange(() => geometryStore.updateAngles())
-  PointB.add(pointB.position, 'z', -10, 10).onChange(() => geometryStore.updateAngles())
+
+  const updatePointA = () => {
+    geometryStore.setPointAPosition(pointA.position.x, pointA.position.y, pointA.position.z)
+  }
+  const updatePointB = () => {
+    geometryStore.setPointBPosition(pointB.position.x, pointB.position.y, pointB.position.z)
+  }
+
+  PointA.add(pointA.position, 'x', -10, 10).onChange(updatePointA)
+  PointA.add(pointA.position, 'y', -10, 10).onChange(updatePointA)
+  PointA.add(pointA.position, 'z', -10, 10).onChange(updatePointA)
+
+  PointB.add(pointB.position, 'x', -10, 10).onChange(updatePointB)
+  PointB.add(pointB.position, 'y', -10, 10).onChange(updatePointB)
+  PointB.add(pointB.position, 'z', -10, 10).onChange(updatePointB)
+
   positionFolder.open()
 
   const lineFolder = gui.addFolder('Линия')
