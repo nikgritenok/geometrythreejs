@@ -117,7 +117,6 @@ const init = () => {
 }
 
 onMounted(() => {
-  // Загружаем сохранённые настройки, если они есть
   const savedSettings = localStorage.getItem('threeSettings')
   if (savedSettings) {
     const settings = JSON.parse(savedSettings)

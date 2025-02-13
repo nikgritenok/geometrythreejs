@@ -17,7 +17,7 @@
 
 ## Посмотреть проект без установки
 
-[Ссылка на сайт](https://three-js-visualizer.vercel.app/)
+[Ссылка на сайт](https://geometrythreejs.vercel.app/)
 
 ## Рекомендуемая настройка IDE
 
