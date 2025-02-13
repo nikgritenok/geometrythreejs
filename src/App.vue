@@ -5,7 +5,7 @@ import AppVisualizer from './components/AppVisualizer.vue'
 <template>
   <header>
     <div class="wrapper">
-      <AppVisualizer msg="Hello Vue 3 + TypeScript + Pinia + Vite" />
+      <AppVisualizer />
     </div>
   </header>
 </template>

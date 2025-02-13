@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 
 const scene = new THREE.Scene()
@@ -17,9 +17,22 @@ const pointB = new THREE.Mesh(
   new THREE.MeshBasicMaterial({ color: 0x0000ff }),
 )
 
+const projectionA = new THREE.Mesh(
+  new THREE.SphereGeometry(0.05),
+  new THREE.MeshBasicMaterial({ color: 0xff8800 }),
+)
+
+const projectionB = new THREE.Mesh(
+  new THREE.SphereGeometry(0.05),
+  new THREE.MeshBasicMaterial({ color: 0xff8800 }),
+)
+
 const lineGeometry = new THREE.BufferGeometry()
 const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff })
 const line = new THREE.Line(lineGeometry, lineMaterial)
+
+const angle = ref(0)
+const azimuth = ref(0)
 
 pointA.position.set(-1, 0, 0)
 pointB.position.set(1, 1, 1)
@@ -37,6 +50,9 @@ function updateLine() {
   lineGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
   lineGeometry.attributes.position.needsUpdate = true
 
+  projectionA.position.set(pointA.position.x, pointA.position.y, 0)
+  projectionB.position.set(pointB.position.x, pointB.position.y, 0)
+
   calculateAngleAndAzimuth()
 }
 
@@ -50,12 +66,12 @@ function calculateAngleAndAzimuth() {
   const normal = new THREE.Vector3(0, 0, 1)
 
   const cosTheta = AB.dot(normal) / (AB.length() * normal.length())
-  const angle = Math.acos(cosTheta) * (180 / Math.PI)
+  const calculatedAngle = Math.acos(cosTheta) * (180 / Math.PI)
 
-  const azimuth = Math.atan2(AB.y, AB.x) * (180 / Math.PI)
+  const calculatedAzimuth = Math.atan2(AB.y, AB.x) * (180 / Math.PI)
 
-  console.log(`Угол наклона: ${angle.toFixed(2)}°`)
-  console.log(`Азимут: ${azimuth.toFixed(2)}°`)
+  angle.value = calculatedAngle
+  azimuth.value = calculatedAzimuth
 }
 
 const init = () => {
@@ -76,7 +92,7 @@ const init = () => {
   const axesHelper = new THREE.AxesHelper(5)
   scene.add(axesHelper)
 
-  scene.add(pointA, pointB, line)
+  scene.add(pointA, pointB, line, projectionA, projectionB)
 
   const transformControlsA = new TransformControls(camera, renderer.domElement)
   transformControlsA.attach(pointA)
@@ -110,11 +126,27 @@ onMounted(() => {
 
 <template>
   <div id="three-container"></div>
+  <div class="info">
+    <p>Угол наклона: {{ angle.toFixed(2) }}°</p>
+    <p>Азимут: {{ azimuth.toFixed(2) }}°</p>
+  </div>
 </template>
 
 <style scoped>
 #three-container {
   width: 100vw;
   height: 100vh;
+}
+
+.info {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: rgba(117, 117, 117, 0.5);
+  border-radius: 18px;
+  color: white;
+  padding: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
 }
 </style>
