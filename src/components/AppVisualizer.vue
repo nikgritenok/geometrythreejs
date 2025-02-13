@@ -1,24 +1,27 @@
 <script setup lang="ts">
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { onMounted, ref } from 'vue'
+import { onMounted, watch } from 'vue'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 import { Line2 } from 'three/examples/jsm/lines/Line2.js'
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js'
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
 import * as dat from 'dat.gui'
+import { useGeometryStore } from '@/stores/useGeometryStore'
+
+const geometryStore = useGeometryStore()
 
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
 const renderer = new THREE.WebGLRenderer({ antialias: true })
 
 const pointA = new THREE.Mesh(
-  new THREE.SphereGeometry(0.1),
-  new THREE.MeshBasicMaterial({ color: 0xff0000 }),
+  new THREE.SphereGeometry(geometryStore.pointARadius),
+  new THREE.MeshBasicMaterial({ color: geometryStore.pointAColor }),
 )
 const pointB = new THREE.Mesh(
-  new THREE.SphereGeometry(0.1),
-  new THREE.MeshBasicMaterial({ color: 0x0000ff }),
+  new THREE.SphereGeometry(geometryStore.pointBRadius),
+  new THREE.MeshBasicMaterial({ color: geometryStore.pointBColor }),
 )
 
 const projectionA = new THREE.Mesh(
@@ -32,64 +35,21 @@ const projectionB = new THREE.Mesh(
 )
 
 const lineGeometry = new LineGeometry()
-lineGeometry.setPositions([
-  pointA.position.x,
-  pointA.position.y,
-  pointA.position.z,
-  pointB.position.x,
-  pointB.position.y,
-  pointB.position.z,
-])
+lineGeometry.setPositions(geometryStore.linePositions)
 
 const lineMaterial = new LineMaterial({
-  color: 0xffffff,
-  linewidth: 5,
+  color: geometryStore.lineColor,
+  linewidth: geometryStore.lineThickness,
   resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
 })
 
 const line = new Line2(lineGeometry, lineMaterial)
 
-const angle = ref(0)
-const azimuth = ref(0)
-
-pointA.position.set(-1, 0, 0)
-pointB.position.set(1, 1, 1)
-updateLine()
-
-function updateLine() {
-  lineGeometry.setPositions([
-    pointA.position.x,
-    pointA.position.y,
-    pointA.position.z,
-    pointB.position.x,
-    pointB.position.y,
-    pointB.position.z,
-  ])
-  line.geometry = lineGeometry
-
-  projectionA.position.set(pointA.position.x, pointA.position.y, 0)
-  projectionB.position.set(pointB.position.x, pointB.position.y, 0)
-
-  calculateAngleAndAzimuth()
-}
-
-function calculateAngleAndAzimuth() {
-  const AB = new THREE.Vector3(
-    pointB.position.x - pointA.position.x,
-    pointB.position.y - pointA.position.y,
-    pointB.position.z - pointA.position.z,
-  )
-
-  const normal = new THREE.Vector3(0, 0, 1)
-
-  const cosTheta = AB.dot(normal) / (AB.length() * normal.length())
-  const calculatedAngle = Math.acos(cosTheta) * (180 / Math.PI)
-
-  const calculatedAzimuth = Math.atan2(AB.y, AB.x) * (180 / Math.PI)
-
-  angle.value = calculatedAngle
-  azimuth.value = calculatedAzimuth
-}
+geometryStore.setPointAPosition(-1, 0, 0)
+geometryStore.setPointBPosition(1, 1, 1)
+pointA.position.copy(geometryStore.pointA)
+pointB.position.copy(geometryStore.pointB)
+geometryStore.updateAngles()
 
 const init = () => {
   renderer.setSize(window.innerWidth, window.innerHeight)
@@ -116,7 +76,9 @@ const init = () => {
   transformControlsA.attach(pointA)
   scene.add(transformControlsA.getHelper())
 
-  transformControlsA.addEventListener('objectChange', updateLine)
+  transformControlsA.addEventListener('objectChange', () => {
+    geometryStore.setPointAPosition(pointA.position.x, pointA.position.y, pointA.position.z)
+  })
   transformControlsA.addEventListener('dragging-changed', (event) => {
     controls.enabled = !event.value
   })
@@ -126,7 +88,9 @@ const init = () => {
   transformControlsB.attach(pointB)
   scene.add(transformControlsB.getHelper())
 
-  transformControlsB.addEventListener('objectChange', updateLine)
+  transformControlsB.addEventListener('objectChange', () => {
+    geometryStore.setPointBPosition(pointB.position.x, pointB.position.y, pointB.position.z)
+  })
   transformControlsB.addEventListener('dragging-changed', (event) => {
     controls.enabled = !event.value
   })
@@ -134,24 +98,26 @@ const init = () => {
   const gui = new dat.GUI()
 
   const params = {
-    pointAColor: '#ff0000',
-    pointBColor: '#0000ff',
+    pointAColor: geometryStore.pointAColor,
+    pointBColor: geometryStore.pointBColor,
     projectionAColor: '#ff8800',
     projectionBColor: '#ff8800',
-    lineColor: '#ffffff',
-    lineThickness: 2,
-    pointARadius: 0.1,
-    pointBRadius: 0.1,
+    lineColor: geometryStore.lineColor,
+    lineThickness: geometryStore.lineThickness,
+    pointARadius: geometryStore.pointARadius,
+    pointBRadius: geometryStore.pointBRadius,
     projectionARadius: 0.05,
     projectionBRadius: 0.05,
   }
 
   const colorsFolder = gui.addFolder('Цвета')
-
   colorsFolder.addColor(params, 'pointAColor').onChange((color) => {
+    geometryStore.pointAColor = color
     pointA.material.color.set(color)
+    console.log(geometryStore.pointAColor)
   })
   colorsFolder.addColor(params, 'pointBColor').onChange((color) => {
+    geometryStore.pointBColor = color
     pointB.material.color.set(color)
   })
   colorsFolder.addColor(params, 'projectionAColor').onChange((color) => {
@@ -161,15 +127,17 @@ const init = () => {
     projectionB.material.color.set(color)
   })
   colorsFolder.addColor(params, 'lineColor').onChange((color) => {
+    geometryStore.lineColor = color
     line.material.color.set(color)
   })
 
   const sizeFolder = gui.addFolder('Размеры')
-
   sizeFolder.add(params, 'pointARadius', 0.01, 1).onChange((size) => {
+    geometryStore.pointARadius = size
     pointA.geometry = new THREE.SphereGeometry(size)
   })
   sizeFolder.add(params, 'pointBRadius', 0.01, 1).onChange((size) => {
+    geometryStore.pointBRadius = size
     pointB.geometry = new THREE.SphereGeometry(size)
   })
   sizeFolder.add(params, 'projectionARadius', 0.01, 1).onChange((size) => {
@@ -180,41 +148,48 @@ const init = () => {
   })
 
   const positionFolder = gui.addFolder('Позиции')
-
   const PointA = positionFolder.addFolder('Точка A')
   const PointB = positionFolder.addFolder('Точка B')
-
-  PointA.add(pointA.position, 'x', -10, 10).onChange(updateLine)
-  PointA.add(pointA.position, 'y', -10, 10).onChange(updateLine)
-  PointA.add(pointA.position, 'z', -10, 10).onChange(updateLine)
-  PointB.add(pointB.position, 'x', -10, 10).onChange(updateLine)
-  PointB.add(pointB.position, 'y', -10, 10).onChange(updateLine)
-  PointB.add(pointB.position, 'z', -10, 10).onChange(updateLine)
+  PointA.add(pointA.position, 'x', -10, 10).onChange(geometryStore.updateAngles)
+  PointA.add(pointA.position, 'y', -10, 10).onChange(geometryStore.updateAngles)
+  PointA.add(pointA.position, 'z', -10, 10).onChange(geometryStore.updateAngles)
+  PointB.add(pointB.position, 'x', -10, 10).onChange(geometryStore.updateAngles)
+  PointB.add(pointB.position, 'y', -10, 10).onChange(geometryStore.updateAngles)
+  PointB.add(pointB.position, 'z', -10, 10).onChange(geometryStore.updateAngles)
   positionFolder.open()
 
   const lineFolder = gui.addFolder('Линия')
-
   lineFolder.add(params, 'lineThickness', 1, 10).onChange((thickness) => {
+    geometryStore.lineThickness = thickness
     line.material.linewidth = thickness
+    console.log(geometryStore.lineThickness)
   })
-}
-
-const animate = () => {
-  requestAnimationFrame(animate)
-  renderer.render(scene, camera)
 }
 
 onMounted(() => {
   init()
   animate()
+
+  watch(
+    () => geometryStore.linePositions,
+    (positions) => {
+      lineGeometry.setPositions(positions)
+    },
+    { deep: true },
+  )
 })
+
+const animate = () => {
+  requestAnimationFrame(animate)
+  renderer.render(scene, camera)
+}
 </script>
 
 <template>
   <div id="three-container"></div>
   <div class="info">
-    <p>Угол наклона: {{ angle.toFixed(2) }}°</p>
-    <p>Азимут: {{ azimuth.toFixed(2) }}°</p>
+    <p>Угол наклона: {{ geometryStore.angle.toFixed(2) }}°</p>
+    <p>Азимут: {{ geometryStore.azimuth.toFixed(2) }}°</p>
   </div>
 </template>
 
