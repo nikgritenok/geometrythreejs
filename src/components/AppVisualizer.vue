@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { onMounted, ref } from 'vue'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
+import * as dat from 'dat.gui'
 
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -81,7 +82,7 @@ const init = () => {
   camera.position.set(0, 2, 5)
 
   const controls = new OrbitControls(camera, renderer.domElement)
-  controls.enableDamping = true
+  controls.enableDamping = false
 
   const light = new THREE.AmbientLight(0xffffff, 1)
   scene.add(light)
@@ -95,6 +96,7 @@ const init = () => {
   scene.add(pointA, pointB, line, projectionA, projectionB)
 
   const transformControlsA = new TransformControls(camera, renderer.domElement)
+  transformControlsA.setSize(0.5)
   transformControlsA.attach(pointA)
   scene.add(transformControlsA.getHelper())
 
@@ -104,12 +106,41 @@ const init = () => {
   })
 
   const transformControlsB = new TransformControls(camera, renderer.domElement)
+  transformControlsB.setSize(0.5)
   transformControlsB.attach(pointB)
   scene.add(transformControlsB.getHelper())
 
   transformControlsB.addEventListener('objectChange', updateLine)
   transformControlsB.addEventListener('dragging-changed', (event) => {
     controls.enabled = !event.value
+  })
+
+  const gui = new dat.GUI()
+
+  const params = {
+    pointAColor: '#ff0000',
+    pointBColor: '#0000ff',
+    projectionAColor: '#ff8800',
+    projectionBColor: '#ff8800',
+    lineColor: '#ffffff',
+  }
+
+  const colorsFolder = gui.addFolder('Цвета')
+
+  colorsFolder.addColor(params, 'pointAColor').onChange((color) => {
+    pointA.material.color.set(color)
+  })
+  colorsFolder.addColor(params, 'pointBColor').onChange((color) => {
+    pointB.material.color.set(color)
+  })
+  colorsFolder.addColor(params, 'projectionAColor').onChange((color) => {
+    projectionA.material.color.set(color)
+  })
+  colorsFolder.addColor(params, 'projectionBColor').onChange((color) => {
+    projectionB.material.color.set(color)
+  })
+  colorsFolder.addColor(params, 'lineColor').onChange((color) => {
+    line.material.color.set(color)
   })
 }
 
