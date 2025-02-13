@@ -3,6 +3,9 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { onMounted, ref } from 'vue'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
+import { Line2 } from 'three/examples/jsm/lines/Line2.js'
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js'
+import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
 import * as dat from 'dat.gui'
 
 const scene = new THREE.Scene()
@@ -28,9 +31,23 @@ const projectionB = new THREE.Mesh(
   new THREE.MeshBasicMaterial({ color: 0xff8800 }),
 )
 
-const lineGeometry = new THREE.BufferGeometry()
-const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff })
-const line = new THREE.Line(lineGeometry, lineMaterial)
+const lineGeometry = new LineGeometry()
+lineGeometry.setPositions([
+  pointA.position.x,
+  pointA.position.y,
+  pointA.position.z,
+  pointB.position.x,
+  pointB.position.y,
+  pointB.position.z,
+])
+
+const lineMaterial = new LineMaterial({
+  color: 0xffffff,
+  linewidth: 5,
+  resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
+})
+
+const line = new Line2(lineGeometry, lineMaterial)
 
 const angle = ref(0)
 const azimuth = ref(0)
@@ -40,7 +57,7 @@ pointB.position.set(1, 1, 1)
 updateLine()
 
 function updateLine() {
-  const positions = new Float32Array([
+  lineGeometry.setPositions([
     pointA.position.x,
     pointA.position.y,
     pointA.position.z,
@@ -48,8 +65,7 @@ function updateLine() {
     pointB.position.y,
     pointB.position.z,
   ])
-  lineGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-  lineGeometry.attributes.position.needsUpdate = true
+  line.geometry = lineGeometry
 
   projectionA.position.set(pointA.position.x, pointA.position.y, 0)
   projectionB.position.set(pointB.position.x, pointB.position.y, 0)
@@ -123,6 +139,11 @@ const init = () => {
     projectionAColor: '#ff8800',
     projectionBColor: '#ff8800',
     lineColor: '#ffffff',
+    lineThickness: 2,
+    pointARadius: 0.1,
+    pointBRadius: 0.1,
+    projectionARadius: 0.05,
+    projectionBRadius: 0.05,
   }
 
   const colorsFolder = gui.addFolder('Цвета')
@@ -141,6 +162,40 @@ const init = () => {
   })
   colorsFolder.addColor(params, 'lineColor').onChange((color) => {
     line.material.color.set(color)
+  })
+
+  const sizeFolder = gui.addFolder('Размеры')
+
+  sizeFolder.add(params, 'pointARadius', 0.01, 1).onChange((size) => {
+    pointA.geometry = new THREE.SphereGeometry(size)
+  })
+  sizeFolder.add(params, 'pointBRadius', 0.01, 1).onChange((size) => {
+    pointB.geometry = new THREE.SphereGeometry(size)
+  })
+  sizeFolder.add(params, 'projectionARadius', 0.01, 1).onChange((size) => {
+    projectionA.geometry = new THREE.SphereGeometry(size)
+  })
+  sizeFolder.add(params, 'projectionBRadius', 0.01, 1).onChange((size) => {
+    projectionB.geometry = new THREE.SphereGeometry(size)
+  })
+
+  const positionFolder = gui.addFolder('Позиции')
+
+  const PointA = positionFolder.addFolder('Точка A')
+  const PointB = positionFolder.addFolder('Точка B')
+
+  PointA.add(pointA.position, 'x', -10, 10).onChange(updateLine)
+  PointA.add(pointA.position, 'y', -10, 10).onChange(updateLine)
+  PointA.add(pointA.position, 'z', -10, 10).onChange(updateLine)
+  PointB.add(pointB.position, 'x', -10, 10).onChange(updateLine)
+  PointB.add(pointB.position, 'y', -10, 10).onChange(updateLine)
+  PointB.add(pointB.position, 'z', -10, 10).onChange(updateLine)
+  positionFolder.open()
+
+  const lineFolder = gui.addFolder('Линия')
+
+  lineFolder.add(params, 'lineThickness', 1, 10).onChange((thickness) => {
+    line.material.linewidth = thickness
   })
 }
 
