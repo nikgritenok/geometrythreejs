@@ -6,7 +6,6 @@ import { TransformControls } from 'three/examples/jsm/controls/TransformControls
 import { Line2 } from 'three/examples/jsm/lines/Line2.js'
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js'
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
-import * as dat from 'dat.gui'
 import { useGeometryStore } from '@/stores/useGeometryStore'
 import { setupDatGui } from '@/utils/guiConfig'
 
@@ -79,12 +78,12 @@ const init = () => {
 
   transformControlsA.addEventListener('objectChange', () => {
     geometryStore.setPointAPosition(pointA.position.x, pointA.position.y, pointA.position.z)
+    projectionA.position.copy(geometryStore.projectionA)
+    projectionB.position.copy(geometryStore.projectionB)
   })
   transformControlsA.addEventListener('dragging-changed', (event) => {
     controls.enabled = !event.value
   })
-
-  setupDatGui({ pointA, pointB, projectionA, projectionB, line })
 
   const transformControlsB = new TransformControls(camera, renderer.domElement)
   transformControlsB.setSize(0.5)
@@ -93,20 +92,28 @@ const init = () => {
 
   transformControlsB.addEventListener('objectChange', () => {
     geometryStore.setPointBPosition(pointB.position.x, pointB.position.y, pointB.position.z)
+    projectionA.position.copy(geometryStore.projectionA)
+    projectionB.position.copy(geometryStore.projectionB)
   })
   transformControlsB.addEventListener('dragging-changed', (event) => {
     controls.enabled = !event.value
   })
+
+  setupDatGui({ pointA, pointB, projectionA, projectionB, line })
 }
 
 onMounted(() => {
   init()
+  geometryStore.updateProjections()
+  projectionA.position.copy(geometryStore.projectionA)
+  projectionB.position.copy(geometryStore.projectionB)
   animate()
 
   watch(
     () => geometryStore.linePositions,
     (positions) => {
       lineGeometry.setPositions(positions)
+      line.geometry = lineGeometry
     },
     { deep: true },
   )

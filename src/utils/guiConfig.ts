@@ -1,4 +1,3 @@
-// src/utils/guiConfig.ts
 import * as dat from 'dat.gui'
 import * as THREE from 'three'
 import type { Mesh } from 'three'
@@ -31,28 +30,26 @@ export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: 
 
   const gui = new dat.GUI()
 
-  // Папка с цветами
   const colorsFolder = gui.addFolder('Цвета')
   colorsFolder.addColor(params, 'pointAColor').onChange((color: string) => {
     geometryStore.pointAColor = color
-    pointA.material.color.set(color)
+    ;(pointA.material as THREE.MeshBasicMaterial).color.set(color)
   })
   colorsFolder.addColor(params, 'pointBColor').onChange((color: string) => {
     geometryStore.pointBColor = color
-    pointB.material.color.set(color)
+    ;(pointB.material as THREE.MeshBasicMaterial).color.set(color)
   })
   colorsFolder.addColor(params, 'projectionAColor').onChange((color: string) => {
-    projectionA.material.color.set(color)
+    ;(projectionA.material as THREE.MeshBasicMaterial).color.set(color)
   })
   colorsFolder.addColor(params, 'projectionBColor').onChange((color: string) => {
-    projectionB.material.color.set(color)
+    ;(projectionB.material as THREE.MeshBasicMaterial).color.set(color)
   })
   colorsFolder.addColor(params, 'lineColor').onChange((color: string) => {
     geometryStore.lineColor = color
     line.material.color.set(color)
   })
 
-  // Папка с размерами
   const sizeFolder = gui.addFolder('Размеры')
   sizeFolder.add(params, 'pointARadius', 0.01, 1).onChange((size: number) => {
     geometryStore.pointARadius = size
@@ -69,7 +66,6 @@ export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: 
     projectionB.geometry = new THREE.SphereGeometry(size)
   })
 
-  // Папка с позициями
   const positionFolder = gui.addFolder('Позиции')
   const PointA = positionFolder.addFolder('Точка A')
   const PointB = positionFolder.addFolder('Точка B')
@@ -81,7 +77,6 @@ export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: 
   PointB.add(pointB.position, 'z', -10, 10).onChange(() => geometryStore.updateAngles())
   positionFolder.open()
 
-  // Папка для линии
   const lineFolder = gui.addFolder('Линия')
   lineFolder.add(params, 'lineThickness', 1, 10).onChange((thickness: number) => {
     geometryStore.lineThickness = thickness
