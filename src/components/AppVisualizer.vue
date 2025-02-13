@@ -9,12 +9,15 @@ import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
 import { useGeometryStore } from '@/stores/useGeometryStore'
 import { setupDatGui } from '@/utils/guiConfig'
 
+// Подключаем хранилище геометрии
 const geometryStore = useGeometryStore()
 
+// Создание сцены, камеры и рендера
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
 const renderer = new THREE.WebGLRenderer({ antialias: true })
 
+// Создаем точки A и B с настройками из хранилища
 const pointA = new THREE.Mesh(
   new THREE.SphereGeometry(geometryStore.pointARadius),
   new THREE.MeshBasicMaterial({ color: geometryStore.pointAColor }),
@@ -24,16 +27,17 @@ const pointB = new THREE.Mesh(
   new THREE.MeshBasicMaterial({ color: geometryStore.pointBColor }),
 )
 
+// Создание проекций точек
 const projectionA = new THREE.Mesh(
   new THREE.SphereGeometry(0.05),
   new THREE.MeshBasicMaterial({ color: 0xff8800 }),
 )
-
 const projectionB = new THREE.Mesh(
   new THREE.SphereGeometry(0.05),
   new THREE.MeshBasicMaterial({ color: 0xff8800 }),
 )
 
+// Создание линии между точками
 const lineGeometry = new LineGeometry()
 lineGeometry.setPositions(geometryStore.linePositions)
 
@@ -45,32 +49,39 @@ const lineMaterial = new LineMaterial({
 
 const line = new Line2(lineGeometry, lineMaterial)
 
+// Установка начальных позиций точек
 geometryStore.setPointAPosition(-1, 0, 0)
 geometryStore.setPointBPosition(1, 1, 1)
 pointA.position.copy(geometryStore.pointA)
 pointB.position.copy(geometryStore.pointB)
 geometryStore.updateAngles()
 
+// Функция инициализации сцены
 const init = () => {
   renderer.setSize(window.innerWidth, window.innerHeight)
   document.getElementById('three-container')?.appendChild(renderer.domElement)
 
   camera.position.set(0, 2, 5)
 
+  // Добавление управления камерой
   const controls = new OrbitControls(camera, renderer.domElement)
   controls.enableDamping = false
 
+  // Добавление освещения
   const light = new THREE.AmbientLight(0xffffff, 1)
   scene.add(light)
 
+  // Вспомогательные элементы: сетка и оси
   const gridHelper = new THREE.GridHelper(10, 10)
   scene.add(gridHelper)
 
   const axesHelper = new THREE.AxesHelper(5)
   scene.add(axesHelper)
 
+  // Добавление объектов на сцену
   scene.add(pointA, pointB, line, projectionA, projectionB)
 
+  // Управление трансформацией точки A
   const transformControlsA = new TransformControls(camera, renderer.domElement)
   transformControlsA.setSize(0.5)
   transformControlsA.attach(pointA)
@@ -85,6 +96,7 @@ const init = () => {
     controls.enabled = !event.value
   })
 
+  // Управление трансформацией точки B
   const transformControlsB = new TransformControls(camera, renderer.domElement)
   transformControlsB.setSize(0.5)
   transformControlsB.attach(pointB)
@@ -99,8 +111,10 @@ const init = () => {
     controls.enabled = !event.value
   })
 
+  // Настройка панели управления
   setupDatGui({ pointA, pointB, projectionA, projectionB, line })
 
+  // Адаптация рендера под изменения размера окна
   const onWindowResize = () => {
     console.log('onWindowResize')
     const width = window.innerWidth
@@ -116,7 +130,9 @@ const init = () => {
   window.addEventListener('resize', onWindowResize)
 }
 
+// Хук для монтирования компонента
 onMounted(() => {
+  // Загрузка сохраненных настроек
   const savedSettings = localStorage.getItem('threeSettings')
   if (savedSettings) {
     const settings = JSON.parse(savedSettings)
@@ -134,6 +150,7 @@ onMounted(() => {
 
   init()
 
+  // Обновление позиций и цветов объектов
   pointA.position.copy(geometryStore.pointA)
   pointB.position.copy(geometryStore.pointB)
   ;(pointA.material as THREE.MeshBasicMaterial).color.set(geometryStore.pointAColor)
@@ -145,6 +162,7 @@ onMounted(() => {
 
   animate()
 
+  // Наблюдение за изменениями позиций линий
   watch(
     () => geometryStore.linePositions,
     (positions) => {
@@ -155,6 +173,7 @@ onMounted(() => {
   )
 })
 
+// Функция анимации сцены
 const animate = () => {
   requestAnimationFrame(animate)
   renderer.render(scene, camera)
