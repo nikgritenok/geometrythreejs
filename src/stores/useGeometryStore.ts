@@ -34,9 +34,8 @@ export const useGeometryStore = defineStore('geometry', () => {
       pointB.value.z - pointA.value.z,
     )
 
-    const normal = new THREE.Vector3(0, 0, 1)
-    const cosTheta = AB.dot(normal) / (AB.length() * normal.length())
-    angle.value = Math.acos(cosTheta) * (180 / Math.PI)
+    const horizontalLength = Math.sqrt(AB.x * AB.x + AB.y * AB.y)
+    angle.value = Math.atan2(AB.z, horizontalLength) * (180 / Math.PI)
     azimuth.value = Math.atan2(AB.y, AB.x) * (180 / Math.PI)
   }
 
