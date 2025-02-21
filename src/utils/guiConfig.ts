@@ -84,14 +84,22 @@ export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: 
     geometryStore.setPointBPosition(pointB.position.x, pointB.position.y, pointB.position.z)
   }
 
-  // Добавление настроек для позиции точки A и B
-  PointA.add(pointA.position, 'x', -10, 10).onChange(updatePointA)
-  PointA.add(pointA.position, 'y', -10, 10).onChange(updatePointA)
-  PointA.add(pointA.position, 'z', -10, 10).onChange(updatePointA)
+  // Функция обновления всех зависимостей
+  function updateScene() {
+    updatePointA()
+    updatePointB()
+    geometryStore.updateProjections()
+  }
 
-  PointB.add(pointB.position, 'x', -10, 10).onChange(updatePointB)
-  PointB.add(pointB.position, 'y', -10, 10).onChange(updatePointB)
-  PointB.add(pointB.position, 'z', -10, 10).onChange(updatePointB)
+  // Добавление настроек для позиции точки A
+  PointA.add(pointA.position, 'x', -10, 10).onChange(updateScene)
+  PointA.add(pointA.position, 'y', -10, 10).onChange(updateScene)
+  PointA.add(pointA.position, 'z', -10, 10).onChange(updateScene)
+
+  // Добавление настроек для позиции точки B
+  PointB.add(pointB.position, 'x', -10, 10).onChange(updateScene)
+  PointB.add(pointB.position, 'y', -10, 10).onChange(updateScene)
+  PointB.add(pointB.position, 'z', -10, 10).onChange(updateScene)
 
   positionFolder.open()
 
