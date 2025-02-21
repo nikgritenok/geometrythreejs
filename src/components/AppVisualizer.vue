@@ -116,7 +116,6 @@ const init = () => {
 
   // Адаптация рендера под изменения размера окна
   const onWindowResize = () => {
-    console.log('onWindowResize')
     const width = window.innerWidth
     const height = window.innerHeight
 
@@ -133,6 +132,8 @@ const init = () => {
 // Хук для монтирования компонента
 onMounted(() => {
   // Загрузка сохраненных настроек
+
+  console.log('onMounted')
   const savedSettings = localStorage.getItem('threeSettings')
   if (savedSettings) {
     const settings = JSON.parse(savedSettings)
@@ -146,6 +147,7 @@ onMounted(() => {
 
     geometryStore.setPointAPosition(settings.pointA.x, settings.pointA.y, settings.pointA.z)
     geometryStore.setPointBPosition(settings.pointB.x, settings.pointB.y, settings.pointB.z)
+    lineGeometry.setPositions(geometryStore.linePositions)
   }
 
   init()
