@@ -132,8 +132,6 @@ const init = () => {
 // Хук для монтирования компонента
 onMounted(() => {
   // Загрузка сохраненных настроек
-
-  console.log('onMounted')
   const savedSettings = localStorage.getItem('threeSettings')
   if (savedSettings) {
     const settings = JSON.parse(savedSettings)
@@ -170,6 +168,8 @@ onMounted(() => {
     (positions) => {
       lineGeometry.setPositions(positions)
       line.geometry = lineGeometry
+      projectionA.position.copy(geometryStore.projectionA)
+      projectionB.position.copy(geometryStore.projectionB)
     },
     { deep: true },
   )
