@@ -86,9 +86,11 @@ export function setupDatGui({
     pointB.geometry = new THREE.SphereGeometry(size) // Обновление размера точки B
   })
   sizeFolder.add(params, 'projectionARadius', 0.01, 1).onChange((size: number) => {
+    geometryStore.projectionARadius = size
     projectionA.geometry = new THREE.SphereGeometry(size) // Обновление размера проекции A
   })
   sizeFolder.add(params, 'projectionBRadius', 0.01, 1).onChange((size: number) => {
+    geometryStore.projectionBRadius = size
     projectionB.geometry = new THREE.SphereGeometry(size) // Обновление размера проекции B
   })
 
@@ -131,7 +133,7 @@ export function setupDatGui({
   const lineFolder = gui.addFolder('Линия')
   lineFolder.add(params, 'lineThickness', 1, 10).onChange((thickness: number) => {
     geometryStore.lineThickness = thickness
-    line.material.linewidth = thickness // Обновление толщины линии
+    line.material.linewidth = thickness
   })
 
   // Папка для настроек сохранения и сброса
@@ -143,6 +145,8 @@ export function setupDatGui({
         pointBColor: geometryStore.pointBColor,
         pointARadius: geometryStore.pointARadius,
         pointBRadius: geometryStore.pointBRadius,
+        projectionARadius: geometryStore.projectionARadius,
+        projectionBRadius: geometryStore.projectionBRadius,
         lineColor: geometryStore.lineColor,
         lineThickness: geometryStore.lineThickness,
         pointA: { x: pointA.position.x, y: pointA.position.y, z: pointA.position.z },

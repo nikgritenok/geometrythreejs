@@ -75,6 +75,7 @@ const init = () => {
 onMounted(() => {
   // Загрузка сохраненных настроек
   const savedSettings = localStorage.getItem('threeSettings')
+
   if (savedSettings) {
     const settings = JSON.parse(savedSettings)
 
@@ -84,11 +85,17 @@ onMounted(() => {
     geometryStore.pointBRadius = settings.pointBRadius
     geometryStore.lineColor = settings.lineColor
     geometryStore.lineThickness = settings.lineThickness
+    geometryStore.projectionARadius = settings.projectionARadius
+    geometryStore.projectionBRadius = settings.projectionBRadius
 
     geometryStore.setPointAPosition(settings.pointA.x, settings.pointA.y, settings.pointA.z)
     geometryStore.setPointBPosition(settings.pointB.x, settings.pointB.y, settings.pointB.z)
     line.geometry.setPositions(geometryStore.linePositions)
     line.material.linewidth = geometryStore.lineThickness
+    pointA.geometry = new THREE.SphereGeometry(geometryStore.pointARadius)
+    pointB.geometry = new THREE.SphereGeometry(geometryStore.pointBRadius)
+    projectionA.geometry = new THREE.SphereGeometry(geometryStore.projectionARadius)
+    projectionB.geometry = new THREE.SphereGeometry(geometryStore.projectionBRadius)
   }
 
   init()

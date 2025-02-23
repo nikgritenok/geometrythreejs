@@ -12,6 +12,10 @@ export const useGeometryStore = defineStore('geometry', () => {
   const projectionA = ref(new THREE.Vector3(pointA.value.x, pointA.value.y, 0))
   const projectionB = ref(new THREE.Vector3(pointB.value.x, pointB.value.y, 0))
 
+  // Радиусы проекций точек A и B
+  const projectionARadius = ref(0.05)
+  const projectionBRadius = ref(0.05)
+
   // Цвета точек A и B, радиусы точек, цвет линии и толщина линии
   const pointAColor = ref('#ff0000')
   const pointBColor = ref('#0000ff')
@@ -77,6 +81,8 @@ export const useGeometryStore = defineStore('geometry', () => {
     pointB,
     projectionA,
     projectionB,
+    projectionARadius,
+    projectionBRadius,
     pointAColor,
     pointBColor,
     pointARadius,
