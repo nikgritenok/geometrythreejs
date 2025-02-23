@@ -7,6 +7,9 @@ import { setupScene, startAnimationLoop } from '@/utils/sceneSetup'
 import { setupTransformControls } from '@/utils/setupTransformControls'
 import { createPoint } from '@/utils/createPoint'
 import { createLine } from '@/utils/createLine'
+import { useToast } from 'primevue/usetoast'
+
+const toast = useToast()
 
 // Подключаем хранилище геометрии
 const geometryStore = useGeometryStore()
@@ -65,7 +68,7 @@ const init = () => {
   )
 
   // Настройка панели управления
-  setupDatGui({ pointA, pointB, projectionA, projectionB, line })
+  setupDatGui({ pointA, pointB, projectionA, projectionB, line, toast })
 }
 
 // Хук для монтирования компонента
@@ -115,10 +118,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="three-container"></div>
-  <div class="info">
-    <p>Угол наклона: {{ geometryStore.angle.toFixed(2) }}°</p>
-    <p>Азимут: {{ geometryStore.azimuth.toFixed(2) }}°</p>
+  <app-toast position="top-center" />
+  <div class="wrap">
+    <div id="three-container"></div>
+    <div class="info">
+      <p>Угол наклона: {{ geometryStore.angle.toFixed(2) }}°</p>
+      <p>Азимут: {{ geometryStore.azimuth.toFixed(2) }}°</p>
+    </div>
   </div>
 </template>
 
@@ -136,7 +142,6 @@ onMounted(() => {
   border-radius: 18px;
   color: white;
   padding: 10px;
-  font-family: Arial, sans-serif;
   font-size: 16px;
 }
 </style>

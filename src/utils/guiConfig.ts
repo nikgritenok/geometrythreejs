@@ -10,6 +10,7 @@ interface GuiConfigParams {
   projectionA: Mesh // Проекция A
   projectionB: Mesh // Проекция B
   line: Line2 // Линия, соединяющая точки
+  toast: any
 }
 
 let pointAControllers: {
@@ -24,7 +25,14 @@ let pointBControllers: {
 } | null = null
 
 // Функция для настройки интерфейса с помощью dat.GUI
-export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: GuiConfigParams) {
+export function setupDatGui({
+  pointA,
+  pointB,
+  projectionA,
+  projectionB,
+  line,
+  toast,
+}: GuiConfigParams) {
   // Получаем доступ к хранилищу данных о геометрии
   const geometryStore = useGeometryStore()
 
@@ -130,7 +138,6 @@ export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: 
   const settingsFolder = gui.addFolder('Настройки')
   const settingsParams = {
     save: () => {
-      // Сохранение настроек в localStorage
       const settings = {
         pointAColor: geometryStore.pointAColor,
         pointBColor: geometryStore.pointBColor,
@@ -142,11 +149,15 @@ export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: 
         pointB: { x: pointB.position.x, y: pointB.position.y, z: pointB.position.z },
       }
       localStorage.setItem('threeSettings', JSON.stringify(settings))
-      console.log(settings)
-      console.log('Настройки сохранены')
+
+      toast.add({
+        severity: 'success',
+        summary: 'Настройки сохранены',
+        detail: 'Данные успешно сохранены',
+        life: 3000,
+      })
     },
     reset: () => {
-      // Сброс настроек из localStorage
       localStorage.removeItem('threeSettings')
 
       geometryStore.setPointAPosition(-1, 0, 0)
@@ -169,6 +180,13 @@ export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: 
       geometryStore.updateProjections()
       projectionA.position.copy(geometryStore.projectionA)
       projectionB.position.copy(geometryStore.projectionB)
+
+      toast.add({
+        severity: 'warn',
+        summary: 'Настройки сброшены',
+        detail: 'Данные сброшены к значениям по умолчанию',
+        life: 3000,
+      })
     },
   }
   settingsFolder.add(settingsParams, 'save').name('Сохранить настройки')
