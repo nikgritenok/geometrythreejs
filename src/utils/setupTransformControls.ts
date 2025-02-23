@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import type { OrbitControls } from 'three/examples/jsm/Addons.js'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
+import { updateGui } from './guiConfig'
 
 export const setupTransformControls = (
   camera: THREE.Camera,
@@ -20,6 +21,8 @@ export const setupTransformControls = (
     geometryStoreSetter(point.position.x, point.position.y, point.position.z)
     projectionRefs.projectionA.position.copy(projectionRefs.projectionA.position)
     projectionRefs.projectionB.position.copy(projectionRefs.projectionB.position)
+
+    updateGui()
   })
 
   transformControls.addEventListener('dragging-changed', (event) => {

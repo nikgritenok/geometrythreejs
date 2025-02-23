@@ -32,8 +32,6 @@ const line = createLine(
 )
 
 // Установка начальных позиций точек
-geometryStore.setPointAPosition(-1, 0, 0)
-geometryStore.setPointBPosition(1, 1, 1)
 pointA.position.copy(geometryStore.pointA)
 pointB.position.copy(geometryStore.pointB)
 geometryStore.updateAngles()

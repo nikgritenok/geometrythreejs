@@ -12,6 +12,17 @@ interface GuiConfigParams {
   line: Line2 // Линия, соединяющая точки
 }
 
+let pointAControllers: {
+  x: dat.GUIController
+  y: dat.GUIController
+  z: dat.GUIController
+} | null = null
+let pointBControllers: {
+  x: dat.GUIController
+  y: dat.GUIController
+  z: dat.GUIController
+} | null = null
+
 // Функция для настройки интерфейса с помощью dat.GUI
 export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: GuiConfigParams) {
   // Получаем доступ к хранилищу данных о геометрии
@@ -29,6 +40,8 @@ export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: 
     pointBRadius: geometryStore.pointBRadius, // Радиус точки B
     projectionARadius: 0.05, // Радиус проекции A
     projectionBRadius: 0.05, // Радиус проекции B
+    pointA: { x: pointA.position.x, y: pointA.position.y, z: pointA.position.z }, // Позиция точки A
+    pointB: { x: pointB.position.x, y: pointB.position.y, z: pointB.position.z }, // Позиция точки B
   }
 
   const gui = new dat.GUI()
@@ -91,15 +104,18 @@ export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: 
     geometryStore.updateProjections()
   }
 
-  // Добавление настроек для позиции точки A
-  PointA.add(pointA.position, 'x', -10, 10).onChange(updateScene)
-  PointA.add(pointA.position, 'y', -10, 10).onChange(updateScene)
-  PointA.add(pointA.position, 'z', -10, 10).onChange(updateScene)
-
-  // Добавление настроек для позиции точки B
-  PointB.add(pointB.position, 'x', -10, 10).onChange(updateScene)
-  PointB.add(pointB.position, 'y', -10, 10).onChange(updateScene)
-  PointB.add(pointB.position, 'z', -10, 10).onChange(updateScene)
+  // Сохраняем ссылки на контроллеры для точки A
+  pointAControllers = {
+    x: PointA.add(pointA.position, 'x', -10, 10).onChange(updateScene),
+    y: PointA.add(pointA.position, 'y', -10, 10).onChange(updateScene),
+    z: PointA.add(pointA.position, 'z', -10, 10).onChange(updateScene),
+  }
+  // Сохраняем ссылки на контроллеры для точки B
+  pointBControllers = {
+    x: PointB.add(pointB.position, 'x', -10, 10).onChange(updateScene),
+    y: PointB.add(pointB.position, 'y', -10, 10).onChange(updateScene),
+    z: PointB.add(pointB.position, 'z', -10, 10).onChange(updateScene),
+  }
 
   positionFolder.open()
 
@@ -153,10 +169,19 @@ export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: 
       geometryStore.updateProjections()
       projectionA.position.copy(geometryStore.projectionA)
       projectionB.position.copy(geometryStore.projectionB)
-
-      console.log('Настройки сброшены')
     },
   }
   settingsFolder.add(settingsParams, 'save').name('Сохранить настройки')
   settingsFolder.add(settingsParams, 'reset').name('Сбросить настройки')
+}
+
+export function updateGui() {
+  if (pointAControllers && pointBControllers) {
+    pointAControllers.x.updateDisplay()
+    pointAControllers.y.updateDisplay()
+    pointAControllers.z.updateDisplay()
+    pointBControllers.x.updateDisplay()
+    pointBControllers.y.updateDisplay()
+    pointBControllers.z.updateDisplay()
+  }
 }
