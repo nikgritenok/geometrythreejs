@@ -88,6 +88,7 @@ onMounted(() => {
     geometryStore.setPointAPosition(settings.pointA.x, settings.pointA.y, settings.pointA.z)
     geometryStore.setPointBPosition(settings.pointB.x, settings.pointB.y, settings.pointB.z)
     line.geometry.setPositions(geometryStore.linePositions)
+    line.material.linewidth = geometryStore.lineThickness
   }
 
   init()
