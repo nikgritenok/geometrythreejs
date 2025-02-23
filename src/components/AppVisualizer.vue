@@ -7,6 +7,9 @@ import { setupScene, startAnimationLoop } from '@/utils/sceneSetup'
 import { setupTransformControls } from '@/utils/setupTransformControls'
 import { createPoint } from '@/utils/createPoint'
 import { createLine } from '@/utils/createLine'
+import { useToast } from 'primevue/usetoast'
+
+const toast = useToast()
 
 // Подключаем хранилище геометрии
 const geometryStore = useGeometryStore()
@@ -65,13 +68,13 @@ const init = () => {
   )
 
   // Настройка панели управления
-  setupDatGui({ pointA, pointB, projectionA, projectionB, line })
+  setupDatGui({ pointA, pointB, projectionA, projectionB, line, toast })
 }
 
 // Хук для монтирования компонента
 onMounted(() => {
-  // Загрузка сохраненных настроек
   const savedSettings = localStorage.getItem('threeSettings')
+
   if (savedSettings) {
     const settings = JSON.parse(savedSettings)
 
@@ -81,10 +84,22 @@ onMounted(() => {
     geometryStore.pointBRadius = settings.pointBRadius
     geometryStore.lineColor = settings.lineColor
     geometryStore.lineThickness = settings.lineThickness
+    geometryStore.projectionARadius = settings.projectionARadius
+    geometryStore.projectionBRadius = settings.projectionBRadius
+    geometryStore.projectionAColor = settings.projectionAColor
+    geometryStore.projectionBColor = settings.projectionBColor
 
     geometryStore.setPointAPosition(settings.pointA.x, settings.pointA.y, settings.pointA.z)
     geometryStore.setPointBPosition(settings.pointB.x, settings.pointB.y, settings.pointB.z)
     line.geometry.setPositions(geometryStore.linePositions)
+    line.material.linewidth = geometryStore.lineThickness
+    pointA.geometry = new THREE.SphereGeometry(geometryStore.pointARadius)
+    pointB.geometry = new THREE.SphereGeometry(geometryStore.pointBRadius)
+    projectionA.geometry = new THREE.SphereGeometry(geometryStore.projectionARadius)
+    projectionB.geometry = new THREE.SphereGeometry(geometryStore.projectionBRadius)
+    line.material.color.set(geometryStore.lineColor)
+    ;(projectionA.material as THREE.MeshBasicMaterial).color.set(geometryStore.projectionAColor)
+    ;(projectionB.material as THREE.MeshBasicMaterial).color.set(geometryStore.projectionBColor)
   }
 
   init()
@@ -115,10 +130,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="three-container"></div>
-  <div class="info">
-    <p>Угол наклона: {{ geometryStore.angle.toFixed(2) }}°</p>
-    <p>Азимут: {{ geometryStore.azimuth.toFixed(2) }}°</p>
+  <app-toast position="top-center" />
+  <div class="wrap">
+    <div id="three-container"></div>
+    <div class="info">
+      <p>Угол наклона: {{ geometryStore.angle.toFixed(2) }}°</p>
+      <p>Азимут: {{ geometryStore.azimuth.toFixed(2) }}°</p>
+    </div>
   </div>
 </template>
 
@@ -136,7 +154,6 @@ onMounted(() => {
   border-radius: 18px;
   color: white;
   padding: 10px;
-  font-family: Arial, sans-serif;
   font-size: 16px;
 }
 </style>

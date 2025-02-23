@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import type { Mesh } from 'three'
 import type { Line2 } from 'three/examples/jsm/lines/Line2.js'
 import { useGeometryStore } from '@/stores/useGeometryStore'
+import type { ToastServiceMethods } from 'primevue/toastservice'
 
 interface GuiConfigParams {
   pointA: Mesh // Точка A
@@ -10,6 +11,7 @@ interface GuiConfigParams {
   projectionA: Mesh // Проекция A
   projectionB: Mesh // Проекция B
   line: Line2 // Линия, соединяющая точки
+  toast: ToastServiceMethods
 }
 
 let pointAControllers: {
@@ -24,7 +26,14 @@ let pointBControllers: {
 } | null = null
 
 // Функция для настройки интерфейса с помощью dat.GUI
-export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: GuiConfigParams) {
+export function setupDatGui({
+  pointA,
+  pointB,
+  projectionA,
+  projectionB,
+  line,
+  toast,
+}: GuiConfigParams) {
   // Получаем доступ к хранилищу данных о геометрии
   const geometryStore = useGeometryStore()
 
@@ -32,8 +41,8 @@ export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: 
   const params = {
     pointAColor: geometryStore.pointAColor, // Цвет точки A
     pointBColor: geometryStore.pointBColor, // Цвет точки B
-    projectionAColor: '#ff8800', // Цвет проекции A
-    projectionBColor: '#ff8800', // Цвет проекции B
+    projectionAColor: geometryStore.projectionAColor, // Цвет проекции A
+    projectionBColor: geometryStore.projectionBColor, // Цвет проекции B
     lineColor: geometryStore.lineColor, // Цвет линии
     lineThickness: geometryStore.lineThickness, // Толщина линии
     pointARadius: geometryStore.pointARadius, // Радиус точки A
@@ -78,9 +87,11 @@ export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: 
     pointB.geometry = new THREE.SphereGeometry(size) // Обновление размера точки B
   })
   sizeFolder.add(params, 'projectionARadius', 0.01, 1).onChange((size: number) => {
+    geometryStore.projectionARadius = size
     projectionA.geometry = new THREE.SphereGeometry(size) // Обновление размера проекции A
   })
   sizeFolder.add(params, 'projectionBRadius', 0.01, 1).onChange((size: number) => {
+    geometryStore.projectionBRadius = size
     projectionB.geometry = new THREE.SphereGeometry(size) // Обновление размера проекции B
   })
 
@@ -123,30 +134,37 @@ export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: 
   const lineFolder = gui.addFolder('Линия')
   lineFolder.add(params, 'lineThickness', 1, 10).onChange((thickness: number) => {
     geometryStore.lineThickness = thickness
-    line.material.linewidth = thickness // Обновление толщины линии
+    line.material.linewidth = thickness
   })
 
   // Папка для настроек сохранения и сброса
   const settingsFolder = gui.addFolder('Настройки')
   const settingsParams = {
     save: () => {
-      // Сохранение настроек в localStorage
       const settings = {
         pointAColor: geometryStore.pointAColor,
         pointBColor: geometryStore.pointBColor,
+        projectionAColor: params.projectionAColor,
+        projectionBColor: params.projectionBColor,
         pointARadius: geometryStore.pointARadius,
         pointBRadius: geometryStore.pointBRadius,
+        projectionARadius: geometryStore.projectionARadius,
+        projectionBRadius: geometryStore.projectionBRadius,
         lineColor: geometryStore.lineColor,
         lineThickness: geometryStore.lineThickness,
         pointA: { x: pointA.position.x, y: pointA.position.y, z: pointA.position.z },
         pointB: { x: pointB.position.x, y: pointB.position.y, z: pointB.position.z },
       }
       localStorage.setItem('threeSettings', JSON.stringify(settings))
-      console.log(settings)
-      console.log('Настройки сохранены')
+
+      toast.add({
+        severity: 'success',
+        summary: 'Настройки сохранены',
+        detail: 'Данные успешно сохранены',
+        life: 3000,
+      })
     },
     reset: () => {
-      // Сброс настроек из localStorage
       localStorage.removeItem('threeSettings')
 
       geometryStore.setPointAPosition(-1, 0, 0)
@@ -155,6 +173,8 @@ export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: 
       geometryStore.pointBColor = '#0000ff'
       geometryStore.pointARadius = 0.1
       geometryStore.pointBRadius = 0.1
+      geometryStore.projectionARadius = 0.05
+      geometryStore.projectionBRadius = 0.05
       geometryStore.lineColor = '#ffffff'
       geometryStore.lineThickness = 2
       ;(pointA.material as THREE.MeshBasicMaterial).color.set(geometryStore.pointAColor)
@@ -169,6 +189,16 @@ export function setupDatGui({ pointA, pointB, projectionA, projectionB, line }: 
       geometryStore.updateProjections()
       projectionA.position.copy(geometryStore.projectionA)
       projectionB.position.copy(geometryStore.projectionB)
+
+      projectionA.geometry = new THREE.SphereGeometry(geometryStore.projectionARadius)
+      projectionB.geometry = new THREE.SphereGeometry(geometryStore.projectionBRadius)
+
+      toast.add({
+        severity: 'warn',
+        summary: 'Настройки сброшены',
+        detail: 'Данные сброшены к значениям по умолчанию',
+        life: 3000,
+      })
     },
   }
   settingsFolder.add(settingsParams, 'save').name('Сохранить настройки')

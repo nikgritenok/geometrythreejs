@@ -31,7 +31,6 @@ export const setupScene = () => {
 
   // Обработчик изменения размеров окна
   const onWindowResize = () => {
-    console.log('resize')
     const width = window.innerWidth
     const height = window.innerHeight
 
