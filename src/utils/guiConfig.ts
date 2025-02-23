@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import type { Mesh } from 'three'
 import type { Line2 } from 'three/examples/jsm/lines/Line2.js'
 import { useGeometryStore } from '@/stores/useGeometryStore'
+import type { ToastServiceMethods } from 'primevue/toastservice'
 
 interface GuiConfigParams {
   pointA: Mesh // Точка A
@@ -10,7 +11,7 @@ interface GuiConfigParams {
   projectionA: Mesh // Проекция A
   projectionB: Mesh // Проекция B
   line: Line2 // Линия, соединяющая точки
-  toast: any
+  toast: ToastServiceMethods
 }
 
 let pointAControllers: {
@@ -40,8 +41,8 @@ export function setupDatGui({
   const params = {
     pointAColor: geometryStore.pointAColor, // Цвет точки A
     pointBColor: geometryStore.pointBColor, // Цвет точки B
-    projectionAColor: '#ff8800', // Цвет проекции A
-    projectionBColor: '#ff8800', // Цвет проекции B
+    projectionAColor: geometryStore.projectionAColor, // Цвет проекции A
+    projectionBColor: geometryStore.projectionBColor, // Цвет проекции B
     lineColor: geometryStore.lineColor, // Цвет линии
     lineThickness: geometryStore.lineThickness, // Толщина линии
     pointARadius: geometryStore.pointARadius, // Радиус точки A
@@ -143,6 +144,8 @@ export function setupDatGui({
       const settings = {
         pointAColor: geometryStore.pointAColor,
         pointBColor: geometryStore.pointBColor,
+        projectionAColor: params.projectionAColor,
+        projectionBColor: params.projectionBColor,
         pointARadius: geometryStore.pointARadius,
         pointBRadius: geometryStore.pointBRadius,
         projectionARadius: geometryStore.projectionARadius,
@@ -170,6 +173,8 @@ export function setupDatGui({
       geometryStore.pointBColor = '#0000ff'
       geometryStore.pointARadius = 0.1
       geometryStore.pointBRadius = 0.1
+      geometryStore.projectionARadius = 0.05
+      geometryStore.projectionBRadius = 0.05
       geometryStore.lineColor = '#ffffff'
       geometryStore.lineThickness = 2
       ;(pointA.material as THREE.MeshBasicMaterial).color.set(geometryStore.pointAColor)
@@ -184,6 +189,9 @@ export function setupDatGui({
       geometryStore.updateProjections()
       projectionA.position.copy(geometryStore.projectionA)
       projectionB.position.copy(geometryStore.projectionB)
+
+      projectionA.geometry = new THREE.SphereGeometry(geometryStore.projectionARadius)
+      projectionB.geometry = new THREE.SphereGeometry(geometryStore.projectionBRadius)
 
       toast.add({
         severity: 'warn',

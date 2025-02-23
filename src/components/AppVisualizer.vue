@@ -73,7 +73,6 @@ const init = () => {
 
 // Хук для монтирования компонента
 onMounted(() => {
-  // Загрузка сохраненных настроек
   const savedSettings = localStorage.getItem('threeSettings')
 
   if (savedSettings) {
@@ -87,6 +86,8 @@ onMounted(() => {
     geometryStore.lineThickness = settings.lineThickness
     geometryStore.projectionARadius = settings.projectionARadius
     geometryStore.projectionBRadius = settings.projectionBRadius
+    geometryStore.projectionAColor = settings.projectionAColor
+    geometryStore.projectionBColor = settings.projectionBColor
 
     geometryStore.setPointAPosition(settings.pointA.x, settings.pointA.y, settings.pointA.z)
     geometryStore.setPointBPosition(settings.pointB.x, settings.pointB.y, settings.pointB.z)
@@ -96,6 +97,9 @@ onMounted(() => {
     pointB.geometry = new THREE.SphereGeometry(geometryStore.pointBRadius)
     projectionA.geometry = new THREE.SphereGeometry(geometryStore.projectionARadius)
     projectionB.geometry = new THREE.SphereGeometry(geometryStore.projectionBRadius)
+    line.material.color.set(geometryStore.lineColor)
+    ;(projectionA.material as THREE.MeshBasicMaterial).color.set(geometryStore.projectionAColor)
+    ;(projectionB.material as THREE.MeshBasicMaterial).color.set(geometryStore.projectionBColor)
   }
 
   init()
