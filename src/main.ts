@@ -17,7 +17,6 @@ app.use(PrimeVue, {
     preset: Aura,
   },
 })
-app.use(PrimeVue)
 app.use(ToastService)
 
 app.component('app-toast', Toast)
