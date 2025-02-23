@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import * as THREE from 'three'
 import { onMounted, watch } from 'vue'
-import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 import { Line2 } from 'three/examples/jsm/lines/Line2.js'
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js'
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
 import { useGeometryStore } from '@/stores/useGeometryStore'
 import { setupDatGui } from '@/utils/guiConfig'
 import { setupScene } from '@/utils/sceneSetup'
+import { setupTransformControls } from '@/utils/setupTransformControls'
 
 // Подключаем хранилище геометрии
 const geometryStore = useGeometryStore()
@@ -61,35 +61,25 @@ const init = () => {
   // Добавление объектов на сцену
   scene.add(pointA, pointB, line, projectionA, projectionB)
 
-  // Управление трансформацией точки A
-  const transformControlsA = new TransformControls(camera, renderer.domElement)
-  transformControlsA.setSize(0.5)
-  transformControlsA.attach(pointA)
-  scene.add(transformControlsA.getHelper())
-
-  transformControlsA.addEventListener('objectChange', () => {
-    geometryStore.setPointAPosition(pointA.position.x, pointA.position.y, pointA.position.z)
-    projectionA.position.copy(geometryStore.projectionA)
-    projectionB.position.copy(geometryStore.projectionB)
-  })
-  transformControlsA.addEventListener('dragging-changed', (event) => {
-    controls.enabled = !event.value
-  })
-
-  // Управление трансформацией точки B
-  const transformControlsB = new TransformControls(camera, renderer.domElement)
-  transformControlsB.setSize(0.5)
-  transformControlsB.attach(pointB)
-  scene.add(transformControlsB.getHelper())
-
-  transformControlsB.addEventListener('objectChange', () => {
-    geometryStore.setPointBPosition(pointB.position.x, pointB.position.y, pointB.position.z)
-    projectionA.position.copy(geometryStore.projectionA)
-    projectionB.position.copy(geometryStore.projectionB)
-  })
-  transformControlsB.addEventListener('dragging-changed', (event) => {
-    controls.enabled = !event.value
-  })
+  // Настраиваем трансформации для точек
+  setupTransformControls(
+    camera,
+    renderer,
+    controls,
+    pointA,
+    geometryStore.setPointAPosition,
+    { projectionA, projectionB },
+    scene,
+  )
+  setupTransformControls(
+    camera,
+    renderer,
+    controls,
+    pointB,
+    geometryStore.setPointBPosition,
+    { projectionA, projectionB },
+    scene,
+  )
 
   // Настройка панели управления
   setupDatGui({ pointA, pointB, projectionA, projectionB, line })
