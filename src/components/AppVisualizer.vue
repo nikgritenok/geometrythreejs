@@ -1,50 +1,35 @@
 <script setup lang="ts">
 import * as THREE from 'three'
 import { onMounted, watch } from 'vue'
-import { Line2 } from 'three/examples/jsm/lines/Line2.js'
-import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js'
-import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
 import { useGeometryStore } from '@/stores/useGeometryStore'
 import { setupDatGui } from '@/utils/guiConfig'
 import { setupScene } from '@/utils/sceneSetup'
 import { setupTransformControls } from '@/utils/setupTransformControls'
+import { createPoint } from '@/utils/createPoint'
+import { createLine } from '@/utils/createLine'
 
 // Подключаем хранилище геометрии
 const geometryStore = useGeometryStore()
 
 const { scene, camera, renderer, controls } = setupScene()
 
-// Создаем точки A и B с настройками из хранилища
-const pointA = new THREE.Mesh(
-  new THREE.SphereGeometry(geometryStore.pointARadius),
-  new THREE.MeshBasicMaterial({ color: geometryStore.pointAColor }),
+// Создание точек и их проекций на плоскость
+const pointA = createPoint(
+  geometryStore.pointARadius,
+  new THREE.Color(geometryStore.pointAColor).getHex(),
 )
-const pointB = new THREE.Mesh(
-  new THREE.SphereGeometry(geometryStore.pointBRadius),
-  new THREE.MeshBasicMaterial({ color: geometryStore.pointBColor }),
+const pointB = createPoint(
+  geometryStore.pointBRadius,
+  new THREE.Color(geometryStore.pointBColor).getHex(),
 )
-
-// Создание проекций точек
-const projectionA = new THREE.Mesh(
-  new THREE.SphereGeometry(0.05),
-  new THREE.MeshBasicMaterial({ color: 0xff8800 }),
-)
-const projectionB = new THREE.Mesh(
-  new THREE.SphereGeometry(0.05),
-  new THREE.MeshBasicMaterial({ color: 0xff8800 }),
-)
+const projectionA = createPoint(0.05, 0xff8800)
+const projectionB = createPoint(0.05, 0xff8800)
 
 // Создание линии между точками
-const lineGeometry = new LineGeometry()
-lineGeometry.setPositions(geometryStore.linePositions)
-
-const lineMaterial = new LineMaterial({
-  color: geometryStore.lineColor,
-  linewidth: 2,
-  resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
-})
-
-const line = new Line2(lineGeometry, lineMaterial)
+const line = createLine(
+  geometryStore.linePositions,
+  new THREE.Color(geometryStore.lineColor).getHex(),
+)
 
 // Установка начальных позиций точек
 geometryStore.setPointAPosition(-1, 0, 0)
@@ -101,7 +86,7 @@ onMounted(() => {
 
     geometryStore.setPointAPosition(settings.pointA.x, settings.pointA.y, settings.pointA.z)
     geometryStore.setPointBPosition(settings.pointB.x, settings.pointB.y, settings.pointB.z)
-    lineGeometry.setPositions(geometryStore.linePositions)
+    line.geometry.setPositions(geometryStore.linePositions)
   }
 
   init()
@@ -122,8 +107,7 @@ onMounted(() => {
   watch(
     () => geometryStore.linePositions,
     (positions) => {
-      lineGeometry.setPositions(positions)
-      line.geometry = lineGeometry
+      line.geometry.setPositions(positions)
       projectionA.position.copy(geometryStore.projectionA)
       projectionB.position.copy(geometryStore.projectionB)
     },
