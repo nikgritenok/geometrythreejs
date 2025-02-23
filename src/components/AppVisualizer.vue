@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { onMounted, watch } from 'vue'
 import { useGeometryStore } from '@/stores/useGeometryStore'
 import { setupDatGui } from '@/utils/guiConfig'
-import { setupScene } from '@/utils/sceneSetup'
+import { setupScene, startAnimationLoop } from '@/utils/sceneSetup'
 import { setupTransformControls } from '@/utils/setupTransformControls'
 import { createPoint } from '@/utils/createPoint'
 import { createLine } from '@/utils/createLine'
@@ -101,7 +101,7 @@ onMounted(() => {
   projectionA.position.copy(geometryStore.projectionA)
   projectionB.position.copy(geometryStore.projectionB)
 
-  animate()
+  startAnimationLoop(renderer, scene, camera)
 
   // Наблюдение за изменениями позиций линий
   watch(
@@ -114,12 +114,6 @@ onMounted(() => {
     { deep: true },
   )
 })
-
-// Функция анимации сцены
-const animate = () => {
-  requestAnimationFrame(animate)
-  renderer.render(scene, camera)
-}
 </script>
 
 <template>

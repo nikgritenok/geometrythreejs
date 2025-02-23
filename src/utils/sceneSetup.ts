@@ -45,3 +45,15 @@ export const setupScene = () => {
 
   return { scene, camera, renderer, controls, onWindowResize }
 }
+
+export const startAnimationLoop = (
+  renderer: THREE.WebGLRenderer,
+  scene: THREE.Scene,
+  camera: THREE.Camera,
+) => {
+  const animate = () => {
+    requestAnimationFrame(animate)
+    renderer.render(scene, camera)
+  }
+  animate()
+}
