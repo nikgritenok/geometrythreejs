@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { onMounted, watch } from 'vue'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 import { Line2 } from 'three/examples/jsm/lines/Line2.js'
@@ -8,14 +7,12 @@ import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js'
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
 import { useGeometryStore } from '@/stores/useGeometryStore'
 import { setupDatGui } from '@/utils/guiConfig'
+import { setupScene } from '@/utils/sceneSetup'
 
 // Подключаем хранилище геометрии
 const geometryStore = useGeometryStore()
 
-// Создание сцены, камеры и рендера
-const scene = new THREE.Scene()
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-const renderer = new THREE.WebGLRenderer({ antialias: true })
+const { scene, camera, renderer, controls } = setupScene()
 
 // Создаем точки A и B с настройками из хранилища
 const pointA = new THREE.Mesh(
@@ -61,23 +58,6 @@ const init = () => {
   renderer.setSize(window.innerWidth, window.innerHeight)
   document.getElementById('three-container')?.appendChild(renderer.domElement)
 
-  camera.position.set(0, 2, 5)
-
-  // Добавление управления камерой
-  const controls = new OrbitControls(camera, renderer.domElement)
-  controls.enableDamping = false
-
-  // Добавление освещения
-  const light = new THREE.AmbientLight(0xffffff, 1)
-  scene.add(light)
-
-  // Вспомогательные элементы: сетка и оси
-  const gridHelper = new THREE.GridHelper(10, 10)
-  scene.add(gridHelper)
-
-  const axesHelper = new THREE.AxesHelper(5)
-  scene.add(axesHelper)
-
   // Добавление объектов на сцену
   scene.add(pointA, pointB, line, projectionA, projectionB)
 
@@ -113,20 +93,6 @@ const init = () => {
 
   // Настройка панели управления
   setupDatGui({ pointA, pointB, projectionA, projectionB, line })
-
-  // Адаптация рендера под изменения размера окна
-  const onWindowResize = () => {
-    const width = window.innerWidth
-    const height = window.innerHeight
-
-    camera.aspect = width / height
-    camera.updateProjectionMatrix()
-
-    renderer.setSize(width, height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-  }
-
-  window.addEventListener('resize', onWindowResize)
 }
 
 // Хук для монтирования компонента
